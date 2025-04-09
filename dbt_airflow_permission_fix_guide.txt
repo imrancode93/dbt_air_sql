@@ -1,0 +1,28 @@
+Final Checklist: Solving Airflow + dbt Permission Issues (Logs & Target)
+
+✅ 1. Create `logs` and `target` folders inside your dbt project:
+   - Path: `dbt_project/dbtnewdemo/dbtproject/logs`
+   - Path: `dbt_project/dbtnewdemo/dbtproject/target`
+
+✅ 2. Set correct permissions on Windows using `icacls`:
+   - Run these in Command Prompt (cmd):
+     icacls "dbt_project\dbtnewdemo\dbtproject\logs" /grant Everyone:F /T
+     icacls "dbt_project\dbtnewdemo\dbtproject\target" /grant Everyone:F /T
+
+✅ 3. Update `docker-compose.yml` volumes for both `airflow` and `airflow-scheduler`:
+   volumes:
+     - ./dbt_project/dbtnewdemo/dbtproject:/usr/app/dbt
+     - ./dbt_project/dbtnewdemo/dbtproject/target:/usr/app/dbt/target
+     - ./dbt_project/dbtnewdemo/dbtproject/logs:/usr/app/dbt/logs
+
+✅ 4. Rebuild and restart the containers:
+   docker-compose down -v
+   docker-compose up --build
+
+✅ 5. Ensure dbt command uses writable log and target paths in your Airflow DAG:
+   Example command:
+   dbt run --profiles-dir . --log-path /tmp/dbt-logs
+
+✅ 6. Verify by running the DAG from the Airflow UI and checking logs for:
+   - No "Permission denied" errors
+   - Successful model run
