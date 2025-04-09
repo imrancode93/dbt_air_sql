@@ -1,0 +1,17 @@
+FROM apache/airflow:2.8.1-python3.11
+
+USER root
+
+# System dependencies
+RUN apt-get update && \
+    apt-get install -y curl gnupg2 apt-transport-https unixodbc-dev && \
+    curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add - && \
+    curl https://packages.microsoft.com/config/debian/10/prod.list > /etc/apt/sources.list.d/mssql-release.list && \
+    apt-get update && \
+    ACCEPT_EULA=Y apt-get install -y msodbcsql17
+
+# Switch to airflow user before pip install
+USER airflow
+
+# dbt-sqlserver must be installed as airflow user
+RUN pip install dbt-sqlserver
